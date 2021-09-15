@@ -1,0 +1,27 @@
+import /init.recovery.qcom_decrypt.rc
+on early-init
+    insmod /vendor/lib/modules/q6_pdr_dlkm.ko
+    insmod /vendor/lib/modules/q6_notifier_dlkm.ko
+    insmod /vendor/lib/modules/snd_event_dlkm.ko
+    insmod /vendor/lib/modules/apr_dlkm.ko
+    insmod /vendor/lib/modules/adsp_loader_dlkm.ko
+   # insmod /vendor/lib/modules/focaltech_touch.ko
+   # insmod /vendor/lib/modules/xiaomi_touch.ko
+
+on fs
+    wait /dev/block/platform/soc/${ro.boot.bootdevice}
+    symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
+
+on boot
+    setprop sys.usb.config adb
+ #   setprop sys.usb.config mtp,adb
+
+on property:ro.boot.dynamic_partitions=true && property:prepdecrypt.vendor_mounted=1
+    start load_modules
+
+service load_modules /system/bin/load_modules.sh
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
